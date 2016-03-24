@@ -70,17 +70,31 @@ def unbump():
 
 @cli.command()
 def register():
+    """Register the new project."""
     os.system('python setup.py register')
 
 
 @cli.command()
 def build():
+    """Make builds."""
     os.system('python setup.py sdist bdist_wheel')
 
 
 @cli.command()
 def release():
+    """Upload the build."""
     os.system('twine upload dist/*')
+
+
+@cli.command
+def kickstart():
+    """Kickstart a new project.
+
+    Generate template files for a new Python package.
+
+    """
+    # TODO
+    pass
 
 
 if __name__ == '__main__':
