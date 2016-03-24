@@ -38,15 +38,16 @@ def _bump(increment=1):
     if not op.exists(path):
         # Try name.py
         path = name + '.py'
+    # Read the file.
     with open(path, 'r') as f:
         contents = f.read()
+        # Parse the version numbers.
         m = re.search(regex, contents)
         major, minor, build = map(int, m.groups())
+    # Increment the build number.
     with open(path, 'w') as f:
-        new_version = "__version__ = '%d.%d.%d'" % (major,
-                                                    minor,
-                                                    build + increment,
-                                                    )
+        build += increment
+        new_version = "__version__ = '%d.%d.%d'" % (major, minor, build)
         contents = re.sub(regex, new_version, contents)
         f.write(contents)
 
