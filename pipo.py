@@ -29,13 +29,7 @@ def cli():
     pass
 
 
-@cli.command()
-def bump():
-    """Bump the build number in the version.
-
-    `__version__ = 'x.y.z'` => `__version__ = 'x.y.(z+1)'`.
-
-    """
+def _bump(increment=1):
     regex = r"__version__ = '(\d+)\.(\d+)\.(\d+)'"
     # Find the file that contains the version.
     name = op.basename(os.getcwd())
@@ -44,13 +38,33 @@ def bump():
     if not op.exists(path):
         # Try name.py
         path = name + '.py'
-    with open(path, 'r+') as f:
+    with open(path, 'r') as f:
         contents = f.read()
         m = re.search(regex, contents)
         major, minor, build = map(int, m.groups())
-        new_version = "__version__ = '%d.%d.%d'" % (major, minor, build + 1)
+    with open(path, 'w') as f:
+        new_version = "__version__ = '%d.%d.%d'" % (major,
+                                                    minor,
+                                                    build + increment,
+                                                    )
         contents = re.sub(regex, new_version, contents)
         f.write(contents)
+
+
+@cli.command()
+def bump():
+    """Bump the build number in the version.
+
+    `__version__ = 'x.y.z'` => `__version__ = 'x.y.(z+1)'`.
+
+    """
+    _bump(+1)
+
+
+@cli.command()
+def unbump():
+    """Like bump, but in the other direction."""
+    _bump(-1)
 
 
 @cli.command()
