@@ -9,6 +9,7 @@
 
 import os
 import os.path as op
+import re
 
 import click
 
@@ -36,13 +37,17 @@ def bump():
 
     """
     regex = r"__version__ = '(\d+)\.(\d+)\.(\d+)'"
+    # Find the file that contains the version.
     name = op.basename(os.getcwd())
+    # Try name/__init__.py
     path = op.join(name, '__init__.py')
-    assert op.exists(path)
+    if not op.exists(path):
+        # Try name.py
+        path = name + '.py'
     with open(path, 'r+') as f:
         contents = f.read()
         m = re.search(regex, contents)
-        major, minor, build = map(int, p.groups())
+        major, minor, build = map(int, m.groups())
         new_version = "__version__ = '%d.%d.%d'" % (major, minor, build + 1)
         contents = re.sub(regex, new_version, contents)
         f.write(contents)
