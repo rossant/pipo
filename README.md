@@ -14,6 +14,7 @@ Dependencies:
 * pip
 * twine
 * click
+* requests
 
 ## Usage
 
