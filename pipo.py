@@ -50,6 +50,7 @@ def _bump(increment=1):
         new_version = "__version__ = '%d.%d.%d'" % (major, minor, build)
         contents = re.sub(regex, new_version, contents)
         f.write(contents)
+    return (major, minor, build)
 
 
 @cli.command()
@@ -59,13 +60,15 @@ def bump():
     `__version__ = 'x.y.z'` => `__version__ = 'x.y.(z+1)'`.
 
     """
-    _bump(+1)
+    v = _bump(+1)
+    click.echo("Bumped version to %s." % str(v))
 
 
 @cli.command()
 def unbump():
     """Like bump, but in the other direction."""
-    _bump(-1)
+    v = _bump(-1)
+    click.echo("Unbumped version to %s." % str(v))
 
 
 @cli.command()
@@ -81,8 +84,18 @@ def build():
 
 
 @cli.command()
-def release():
+def clear():
+    """Delete the build and dist subdirectories."""
+    os.system('rm -rf dist build')
+    click.echo("Deleted build/ and dist/.")
+
+
+@cli.command()
+@click.pass_context
+def release(ctx):
     """Upload the build."""
+    ctx.invoke(clear)
+    ctx.invoke(build)
     os.system('twine upload dist/*')
 
 
