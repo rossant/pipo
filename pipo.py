@@ -12,6 +12,7 @@ import os.path as op
 import re
 
 import click
+import requests
 
 
 #------------------------------------------------------------------------------
@@ -96,6 +97,18 @@ def unbump():
     """Like bump, but in the other direction."""
     v = _bump(-1)
     click.echo("Unbumped version to %s." % str(v))
+
+
+@cli.command()
+def pipversion():
+    """Return the latest PyPI version of the library."""
+    url = 'https://pypi.python.org/pypi/%s' % lib_name()
+    click.echo("Fetching `%s`..." % url)
+    page = requests.get(url).text
+    name = lib_name()
+    r = re.search(r'%s (\d+\.\d+\.\d+)' % name, page)
+    s = '%s, %s' % (name, r.group(1))
+    click.echo(s)
 
 
 @cli.command()

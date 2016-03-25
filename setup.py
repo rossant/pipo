@@ -15,8 +15,10 @@ setup(
     version=version,
     py_modules=['pipo'],
     install_requires=[
+        'pip',
         'click',
         'twine',
+        'requests',
     ],
     entry_points='''
         [console_scripts]
