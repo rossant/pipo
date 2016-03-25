@@ -2,6 +2,21 @@
 
 setuptools, pip, PyPI made easy.
 
+## Installation
+
+```bash
+pip install pipo
+```
+
+Dependencies:
+
+* Python 2 or 3
+* pip
+* twine
+* click
+
+## Usage
+
 ```bash
 pipo register   # register your new project on PyPI
 pipo build      # build tar.gz and wheel
