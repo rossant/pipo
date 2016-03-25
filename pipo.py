@@ -62,6 +62,9 @@ def bump():
     """
     v = _bump(+1)
     click.echo("Bumped version to %s." % str(v))
+    os.system('git diff')
+    if click.confirm('Commit `Bump version`?'):
+        os.system('git commit -am "Bump version"')
 
 
 @cli.command()
