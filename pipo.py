@@ -39,15 +39,11 @@ def lib_file_path():
     return path
 
 
-def lib_version(path=None):
-    """Return the (major, minor, build) version of the library."""
-    path = path or lib_file_path()
-    # Read the file.
-    with open(path, 'r') as f:
-        contents = f.read()
-        # Parse the version numbers.
-        m = re.search(VERSION_REGEX, contents)
-        return map(int, m.groups())
+def parse_version(contents):
+    """Parse the (major, minor, build) version of the library."""
+    # Parse the version numbers.
+    m = re.search(VERSION_REGEX, contents)
+    return map(int, m.groups())
 
 
 #------------------------------------------------------------------------------
@@ -68,7 +64,9 @@ def cli():
 def _bump(increment=1):
     regex = VERSION_REGEX
     path = lib_file_path()
-    major, minor, build = lib_version(path)
+    with open(path, 'r') as f:
+        contents = f.read()
+    major, minor, build = parse_version(contents)
     # Increment the build number.
     with open(path, 'w') as f:
         build += increment
@@ -115,7 +113,10 @@ def pipversion():
 def version():
     """Display the library version."""
     name = lib_name()
-    major, minor, build = lib_version()
+    path = lib_file_path()
+    with open(path, 'r') as f:
+        contents = f.read()
+    major, minor, build = parse_version(contents)
     click.echo("%s, version %d.%d.%d" % (name, major, minor, build))
 
 
