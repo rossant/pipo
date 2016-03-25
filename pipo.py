@@ -46,19 +46,12 @@ def parse_version(contents):
     return map(int, m.groups())
 
 
-#------------------------------------------------------------------------------
-# pipo
-#------------------------------------------------------------------------------
-
-__version__ = '0.1.0'
-
-
-@click.group()
-@click.version_option(version=__version__)
-@click.help_option('-h', '--help')
-def cli():
-    """Command-line helper for setuptools and PyPI"""
-    pass
+def _pipversion():
+    url = 'https://pypi.python.org/pypi/%s' % lib_name()
+    page = requests.get(url).text
+    name = lib_name()
+    r = re.search(r'%s (\d+\.\d+\.\d+)' % name, page)
+    return r.group(1)
 
 
 def _bump(increment=1):
@@ -74,6 +67,21 @@ def _bump(increment=1):
         contents = re.sub(regex, new_version, contents)
         f.write(contents)
     return (major, minor, build)
+
+
+#------------------------------------------------------------------------------
+# pipo CLI
+#------------------------------------------------------------------------------
+
+__version__ = '0.1.0'
+
+
+@click.group()
+@click.version_option(version=__version__)
+@click.help_option('-h', '--help')
+def cli():
+    """Command-line helper for setuptools and PyPI"""
+    pass
 
 
 @cli.command()
@@ -98,18 +106,6 @@ def unbump():
 
 
 @cli.command()
-def pipversion():
-    """Return the latest PyPI version of the library."""
-    url = 'https://pypi.python.org/pypi/%s' % lib_name()
-    click.echo("Fetching `%s`..." % url)
-    page = requests.get(url).text
-    name = lib_name()
-    r = re.search(r'%s (\d+\.\d+\.\d+)' % name, page)
-    s = '%s, %s' % (name, r.group(1))
-    click.echo(s)
-
-
-@cli.command()
 def version():
     """Display the library version."""
     name = lib_name()
@@ -117,7 +113,11 @@ def version():
     with open(path, 'r') as f:
         contents = f.read()
     major, minor, build = parse_version(contents)
-    click.echo("%s, version %d.%d.%d" % (name, major, minor, build))
+    pipversion = _pipversion()
+    click.echo("%s, version %d.%d.%d (%s on PyPI)" % (name,
+                                                      major, minor, build,
+                                                      pipversion,
+                                                      ))
 
 
 @cli.command()
