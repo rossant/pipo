@@ -15,6 +15,41 @@ import click
 
 
 #------------------------------------------------------------------------------
+# Utils
+#------------------------------------------------------------------------------
+
+VERSION_REGEX = re.compile(r"__version__ = '(\d+)\.(\d+)\.(\d+)'")
+
+
+def lib_name():
+    """Return the library name."""
+    return op.basename(os.getcwd())
+
+
+def lib_file_path():
+    """Return the path to the file that presumably defines `__version__`."""
+    # Find the file that contains the version.
+    name = lib_name()
+    # Try name/__init__.py
+    path = op.join(name, '__init__.py')
+    if not op.exists(path):
+        # Try name.py
+        path = name + '.py'
+    return path
+
+
+def lib_version(path=None):
+    """Return the (major, minor, build) version of the library."""
+    path = path or lib_file_path()
+    # Read the file.
+    with open(path, 'r') as f:
+        contents = f.read()
+        # Parse the version numbers.
+        m = re.search(VERSION_REGEX, contents)
+        return map(int, m.groups())
+
+
+#------------------------------------------------------------------------------
 # pipo
 #------------------------------------------------------------------------------
 
@@ -30,20 +65,9 @@ def cli():
 
 
 def _bump(increment=1):
-    regex = r"__version__ = '(\d+)\.(\d+)\.(\d+)'"
-    # Find the file that contains the version.
-    name = op.basename(os.getcwd())
-    # Try name/__init__.py
-    path = op.join(name, '__init__.py')
-    if not op.exists(path):
-        # Try name.py
-        path = name + '.py'
-    # Read the file.
-    with open(path, 'r') as f:
-        contents = f.read()
-        # Parse the version numbers.
-        m = re.search(regex, contents)
-        major, minor, build = map(int, m.groups())
+    regex = VERSION_REGEX
+    path = lib_file_path()
+    major, minor, build = lib_version(path)
     # Increment the build number.
     with open(path, 'w') as f:
         build += increment
@@ -72,6 +96,14 @@ def unbump():
     """Like bump, but in the other direction."""
     v = _bump(-1)
     click.echo("Unbumped version to %s." % str(v))
+
+
+@cli.command()
+def version():
+    """Display the library version."""
+    name = lib_name()
+    major, minor, build = lib_version()
+    click.echo("%s, version %d.%d.%d" % (name, major, minor, build))
 
 
 @cli.command()
